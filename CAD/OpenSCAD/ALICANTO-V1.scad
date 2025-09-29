@@ -9,6 +9,8 @@ CutNotches=true;
 DrawFin=false;
 DrawNoseconeBulkhead=false;
 DrawAvbayBulkhead=false;
+DrawAvbayBulkheadOuter=false;
+DrawAvbayBulkheadInner=false;
 DrawAvbaySled = false;
 DrawAftFairing = false;
 DrawRingMarkingGuide=false;
@@ -217,6 +219,57 @@ module Fairing(FHeight,FDiamMin,FDiamMax,FHoleDiam) {
     }
 }
 
+module AvbayBulkhead() {
+    // Avbay measurements
+    AvbayOD=98;
+    FudgeID=1;
+    AvbayID=AvbayOD-(1.84*2)+FudgeID;
+    AvbayBulkheadThickness=0.25*InMm;
+    UboltCenterToCenter=1.375*InMm;
+    ThreadedRodCenterToCenter=2.5*InMm;
+    ChargeWellDiameter = 0.85 * InMm;
+    ChargeWellWall = 2;
+    ChargeWellDepth = 15;
+    ChargeWellCoordinates = [[-45,(AvbayOD/3)],[45,(AvbayOD/3)]];
+    ChargeWireDiameter = 3;
+
+    if(DrawAvbayBulkhead) {
+        difference() {
+            // Bulkhead
+            union() {
+                if(DrawAvbayBulkheadOuter) 
+                    translate([0,0,(AvbayBulkheadThickness/2)]) 
+                    cyl(h=(AvbayBulkheadThickness/2),d=AvbayOD,align=V_TOP);
+                if(DrawAvbayBulkheadInner) 
+                    cyl(h=AvbayBulkheadThickness,d=AvbayID,align=V_TOP);
+                // Charge wells
+            }
+            // U-bolt holes
+            for(i=[1,-1]) {
+                translate([((UboltCenterToCenter/2)*i),0,0]) 
+                    cyl(h=AvbayBulkheadThickness,d=UboltHoleDiameter,align=V_TOP);
+            }
+            // Threaded rod holes
+            for(i=[1,-1]) {
+                translate([0,((ThreadedRodCenterToCenter/2)*i),0]) 
+                    cyl(h=AvbayBulkheadThickness,d=UboltHoleDiameter,align=V_TOP);
+            }
+            // Charge well wire holes
+            for(i=ChargeWellCoordinates) {
+                rotate([0,0,(i[0]-90)]) 
+                    translate([i[1],0,0]) 
+                        cyl(h=AvbayBulkheadThickness,d=ChargeWireDiameter,align=V_TOP);
+            }
+        }
+    //    for(i=ChargeWellCoordinates) {
+    //        translate([0,0,AvbayBulkheadThickness]) 
+    //            rotate([0,0,i[0]]) 
+    //                translate([0,i[1],0]) 
+    //                    ChargeWell();
+    //    }
+    }
+}
+
 
 // ********
 // Main
@@ -228,6 +281,9 @@ offset(delta=LaserKerf/2) {
         }
         if(DrawFin) {
             Fin();
+        }
+        if(DrawAvbayBulkhead) {
+            AvbayBulkhead();
         }
     }
 }
@@ -244,53 +300,6 @@ if(DrawNoseconeBulkhead) {
                 cyl(h=PlywoodThickness,d=ThreadedRod_diameter);
             }
         }
-    }
-}
-
-// Avbay measurements
-AvbayOD=98;
-FudgeID=1;
-AvbayID=AvbayOD-(1.84*2)+FudgeID;
-AvbayBulkheadThickness=0.25*InMm;
-UboltCenterToCenter=1.375*InMm;
-ThreadedRodCenterToCenter=2.5*InMm;
-ChargeWellDiameter = 0.85 * InMm;
-ChargeWellWall = 2;
-ChargeWellDepth = 15;
-ChargeWellCoordinates = [[-45,(AvbayOD/3)],[45,(AvbayOD/3)]];
-ChargeWireDiameter = 3;
-
-if(DrawAvbayBulkhead) {
-    difference() {
-        // Bulkhead
-        union() {
-            translate([0,0,(AvbayBulkheadThickness/2)]) 
-                cyl(h=(AvbayBulkheadThickness/2),d=AvbayOD,align=V_TOP);
-            cyl(h=AvbayBulkheadThickness,d=AvbayID,align=V_TOP);
-            // Charge wells
-        }
-        // U-bolt holes
-        for(i=[1,-1]) {
-            translate([((UboltCenterToCenter/2)*i),0,0]) 
-                cyl(h=AvbayBulkheadThickness,d=UboltHoleDiameter,align=V_TOP);
-        }
-        // Threaded rod holes
-        for(i=[1,-1]) {
-            translate([0,((ThreadedRodCenterToCenter/2)*i),0]) 
-                cyl(h=AvbayBulkheadThickness,d=UboltHoleDiameter,align=V_TOP);
-        }
-        // Charge well wire holes
-        for(i=ChargeWellCoordinates) {
-            rotate([0,0,(i[0]-90)]) 
-                translate([i[1],0,0]) 
-                    cyl(h=AvbayBulkheadThickness,d=ChargeWireDiameter,align=V_TOP);
-        }
-    }
-    for(i=ChargeWellCoordinates) {
-        translate([0,0,AvbayBulkheadThickness]) 
-            rotate([0,0,i[0]]) 
-                translate([0,i[1],0]) 
-                    ChargeWell();
     }
 }
 
